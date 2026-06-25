@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personagens | Initiative Tracker</title>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+  <main class="container">
+    <div id="page-alert" class="alert alert-error"></div>
+
+    <div class="page-header flex-between">
+      <div>
+        <h1>Meus Personagens</h1>
+        <p class="text-muted">Gerencie seus personagens para participar de combates</p>
+      </div>
+      <button class="btn btn-primary" id="new-char-btn">+ Novo Personagem</button>
+    </div>
+
+    <!-- Formulário (oculto por padrão) -->
+    <div id="form-section" class="card mb-3" style="display:none">
+      <div class="card-header">
+        <h2 id="form-title">Novo Personagem</h2>
+      </div>
+      <div id="form-alert" class="alert alert-error"></div>
+      <form id="char-form">
+        <div class="form-group">
+          <label class="form-label" for="name">Nome do Personagem</label>
+          <input class="form-control" id="name" type="text" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="initiative_bonus">Bônus de Iniciativa</label>
+          <input class="form-control" id="initiative_bonus" type="number" value="0">
+          <p class="form-hint">Modificador de Destreza + outros bônus aplicáveis.</p>
+        </div>
+        <div class="flex gap-1 mt-2">
+          <button class="btn btn-primary" id="submit-btn" type="submit">Criar</button>
+          <button class="btn btn-outline" id="cancel-btn" type="button">Cancelar</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="character-list" class="grid-2"></div>
+  </main>
+
+  <script type="module" src="./dist/characters.js"></script>
+</body>
+</html>

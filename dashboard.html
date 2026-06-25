@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Combates | Initiative Tracker</title>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+  <main class="container">
+    <div id="page-alert" class="alert alert-error"></div>
+
+    <div class="page-header flex-between">
+      <div>
+        <h1>Combates</h1>
+        <p class="text-muted">Gerencie suas sessões de combate</p>
+      </div>
+    </div>
+
+    <!-- Criação de combate (visível apenas para mestres via JS) -->
+    <div id="create-section" class="card mb-3" style="display:none">
+      <div class="card-header">
+        <h2>Novo Combate</h2>
+      </div>
+      <div id="create-alert" class="alert alert-error"></div>
+      <form id="create-form" class="flex gap-1">
+        <input class="form-control" id="combat-name" type="text" placeholder="Nome do combate..." required style="flex:1">
+        <button class="btn btn-primary" id="create-btn" type="submit">Criar</button>
+      </form>
+    </div>
+
+    <div id="combat-list"></div>
+  </main>
+
+  <script type="module" src="./dist/dashboard.js"></script>
+</body>
+</html>

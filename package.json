@@ -1,0 +1,12 @@
+{
+  "name": "initiative-tracker-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Initiative Tracker RPG app",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

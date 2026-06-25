@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil | Initiative Tracker</title>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+  <main class="container-sm">
+    <div class="page-header">
+      <h1>Perfil</h1>
+    </div>
+
+    <!-- Informações -->
+    <div class="card mb-3">
+      <div class="card-header">
+        <h2>Informações da Conta</h2>
+      </div>
+      <div style="margin-bottom:16px">
+        <p class="form-label">Username</p>
+        <p id="username-display" class="text-accent" style="font-weight:600; font-size:1.1rem"></p>
+      </div>
+      <div style="margin-bottom:16px">
+        <p class="form-label">Tipo de usuário</p>
+        <p id="role-display"></p>
+      </div>
+      <hr class="divider">
+      <div id="profile-alert" class="alert alert-error"></div>
+      <form id="profile-form">
+        <div class="form-group">
+          <label class="form-label" for="email-input">Email</label>
+          <p class="form-hint mb-1">Usado para recuperação de senha.</p>
+          <div id="email-display" class="text-muted mb-1" style="font-size:0.85rem"></div>
+          <input class="form-control" id="email-input" type="email" autocomplete="email">
+        </div>
+        <button class="btn btn-primary" id="save-profile-btn" type="submit">Salvar</button>
+      </form>
+    </div>
+
+    <!-- Trocar senha -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Alterar Senha</h2>
+      </div>
+      <div id="password-alert" class="alert alert-error"></div>
+      <form id="password-form">
+        <div class="form-group">
+          <label class="form-label" for="old-password">Senha Atual</label>
+          <input class="form-control" id="old-password" type="password" autocomplete="current-password" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="new-password">Nova Senha</label>
+          <input class="form-control" id="new-password" type="password" autocomplete="new-password" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="confirm-password">Confirmar Nova Senha</label>
+          <input class="form-control" id="confirm-password" type="password" autocomplete="new-password" required>
+        </div>
+        <button class="btn btn-primary" id="save-password-btn" type="submit">Alterar Senha</button>
+      </form>
+    </div>
+  </main>
+
+  <script type="module" src="./dist/profile.js"></script>
+</body>
+</html>

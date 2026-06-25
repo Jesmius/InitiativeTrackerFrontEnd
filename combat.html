@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Combate | Initiative Tracker</title>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+  <main class="container">
+    <div id="page-alert" class="alert alert-error"></div>
+
+    <!-- Cabeçalho do combate -->
+    <div class="round-banner">
+      <div class="round-info">
+        <h2 id="combat-title">Carregando...</h2>
+        <p id="round-num" class="text-muted"></p>
+      </div>
+      <div class="flex gap-1">
+        <span id="status-badge"></span>
+        <a href="./dashboard.html" class="btn btn-sm btn-outline">← Voltar</a>
+        <button class="btn btn-sm btn-outline" id="refresh-btn" title="Atualizar">↻</button>
+      </div>
+    </div>
+
+    <!-- Banner do turno atual -->
+    <div id="turn-banner" class="current-turn-banner" style="display:none"></div>
+
+    <!-- Controles do Mestre -->
+    <div id="master-controls" class="flex gap-1 mb-3" style="display:none">
+      <button class="btn btn-primary" id="next-turn-btn">⏭ Próximo Turno</button>
+      <button class="btn btn-outline" id="sort-btn">⬆ Ordenar por Iniciativa</button>
+      <button class="btn btn-success" id="add-participant-btn">+ Adicionar Participante</button>
+      <button class="btn btn-outline" id="end-combat-btn">Encerrar Combate</button>
+    </div>
+
+    <!-- Controles do Jogador -->
+    <div id="player-controls" class="mb-3" style="display:none">
+      <button class="btn btn-primary" id="pass-turn-btn" disabled>Passar Meu Turno ⏭</button>
+    </div>
+
+    <!-- Tabela de iniciativa -->
+    <div class="card" style="padding:0; overflow:hidden">
+      <table class="initiative-table">
+        <thead>
+          <tr>
+            <th style="width:48px">#</th>
+            <th>Nome</th>
+            <th>Tipo</th>
+            <th style="width:80px;text-align:center">Iniciativa</th>
+            <th style="width:50px;text-align:center">Status</th>
+            <th style="width:180px"></th>
+          </tr>
+        </thead>
+        <tbody id="participants-tbody">
+          <tr><td colspan="6" class="text-center text-muted" style="padding:32px">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Modal: Adicionar Participante -->
+  <div id="add-modal" class="modal-overlay" style="display:none">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Adicionar Participante</h3>
+        <button class="modal-close" id="modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="modal-alert" class="alert alert-error"></div>
+        <form id="add-participant-form">
+          <div class="form-group">
+            <label class="form-label" for="participant-type">Tipo</label>
+            <select class="form-control" id="participant-type">
+              <option value="character">Personagem</option>
+              <option value="enemy">Inimigo</option>
+            </select>
+          </div>
+          <div class="form-group" id="char-group">
+            <label class="form-label" for="char-select">Personagem</label>
+            <select class="form-control" id="char-select"></select>
+          </div>
+          <div class="form-group" id="enemy-group" style="display:none">
+            <label class="form-label" for="enemy-select">Inimigo</label>
+            <select class="form-control" id="enemy-select"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="initiative-input">Valor de Iniciativa (d20 + bônus)</label>
+            <input class="form-control" id="initiative-input" type="number" value="10" min="1" max="30" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="modal-cancel">Cancelar</button>
+        <button class="btn btn-primary" type="submit" form="add-participant-form">Adicionar</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./dist/combat.js"></script>
+</body>
+</html>
