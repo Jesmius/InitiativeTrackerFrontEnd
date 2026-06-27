@@ -207,10 +207,12 @@ async function openAddModal(): Promise<void> {
 
   await populateSelects();
 
+  const enemyNameGroup = document.getElementById('enemy-name-group') as HTMLElement;
   typeSelect.addEventListener('change', () => {
     const isChar = typeSelect.value === 'character';
     charGroup.style.display = isChar ? 'block' : 'none';
     enemyGroup.style.display = isChar ? 'none' : 'block';
+    enemyNameGroup.style.display = isChar ? 'none' : 'block';
   });
   typeSelect.dispatchEvent(new Event('change'));
 }
@@ -231,10 +233,20 @@ async function populateSelects(): Promise<void> {
   if (chars.length === 0) charSelect.innerHTML = '<option disabled>Nenhum jogador na sua lista. Adicione jogadores em "Jogadores".</option>';
 
   const enemySelect = document.getElementById('enemy-select') as HTMLSelectElement;
+  const enemyNameInput = document.getElementById('enemy-name-input') as HTMLInputElement;
   enemySelect.innerHTML = enemies.map(e =>
-    `<option value="${e.id}">${esc(e.name)} [HP: ${e.hp} | Bonus: ${e.initiative_bonus >= 0 ? '+' : ''}${e.initiative_bonus}]</option>`
+    `<option value="${e.id}" data-name="${esc(e.name)}">${esc(e.name)} [HP: ${e.hp} | Bonus: ${e.initiative_bonus >= 0 ? '+' : ''}${e.initiative_bonus}]</option>`
   ).join('');
-  if (enemies.length === 0) enemySelect.innerHTML = '<option disabled>Nenhum inimigo cadastrado</option>';
+  if (enemies.length === 0) {
+    enemySelect.innerHTML = '<option disabled>Nenhum inimigo cadastrado</option>';
+  } else {
+    const updateNamePlaceholder = () => {
+      const opt = enemySelect.selectedOptions[0];
+      if (opt && enemyNameInput) enemyNameInput.placeholder = opt.dataset['name'] ?? '';
+    };
+    enemySelect.addEventListener('change', updateNamePlaceholder);
+    updateNamePlaceholder();
+  }
 }
 
 document.getElementById('add-participant-form')?.addEventListener('submit', async (e) => {
@@ -242,11 +254,13 @@ document.getElementById('add-participant-form')?.addEventListener('submit', asyn
   const type = (document.getElementById('participant-type') as HTMLSelectElement).value;
   const initiative = Number((document.getElementById('initiative-input') as HTMLInputElement).value);
 
-  const body: Record<string, number | null> = { initiative_value: initiative, character: null, enemy: null };
+  const body: Record<string, unknown> = { initiative_value: initiative, character: null, enemy: null };
   if (type === 'character') {
     body['character'] = Number((document.getElementById('char-select') as HTMLSelectElement).value);
   } else {
     body['enemy'] = Number((document.getElementById('enemy-select') as HTMLSelectElement).value);
+    const nameOverride = (document.getElementById('enemy-name-input') as HTMLInputElement).value.trim();
+    if (nameOverride) body['name_override'] = nameOverride;
   }
 
   const res = await apiFetch(`/api/combats/${combatId}/participants/`, { method: 'POST', body: JSON.stringify(body) });
@@ -257,6 +271,7 @@ document.getElementById('add-participant-form')?.addEventListener('submit', asyn
 function closeModal(): void {
   const modal = document.getElementById('add-modal') as HTMLElement;
   modal.style.display = 'none';
+  (document.getElementById('enemy-name-input') as HTMLInputElement).value = '';
 }
 
 // ─── Participant Actions ───────────────────────────────────────────────────────
@@ -269,12 +284,7 @@ async function updateInitiative(id: number, value: number): Promise<void> {
   loadCombat();
 }
 
-async function updateHP(id: number, newHP: number, participantType: string): Promise<void> {
-  if (newHP <= 0 && participantType === 'enemy') {
-    await apiFetch(`/api/participants/${id}/`, { method: 'DELETE' });
-    loadCombat();
-    return;
-  }
+async function updateHP(id: number, newHP: number, _participantType: string): Promise<void> {
   const hp = Math.max(0, newHP);
   const body: Record<string, unknown> = { current_hp: hp };
   if (isMaster) body['is_alive'] = hp > 0;

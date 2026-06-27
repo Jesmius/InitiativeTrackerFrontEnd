@@ -194,10 +194,12 @@ async function openAddModal() {
     const charGroup = document.getElementById('char-group');
     const enemyGroup = document.getElementById('enemy-group');
     await populateSelects();
+    const enemyNameGroup = document.getElementById('enemy-name-group');
     typeSelect.addEventListener('change', () => {
         const isChar = typeSelect.value === 'character';
         charGroup.style.display = isChar ? 'block' : 'none';
         enemyGroup.style.display = isChar ? 'none' : 'block';
+        enemyNameGroup.style.display = isChar ? 'none' : 'block';
     });
     typeSelect.dispatchEvent(new Event('change'));
 }
@@ -213,9 +215,20 @@ async function populateSelects() {
     if (chars.length === 0)
         charSelect.innerHTML = '<option disabled>Nenhum jogador na sua lista. Adicione jogadores em "Jogadores".</option>';
     const enemySelect = document.getElementById('enemy-select');
-    enemySelect.innerHTML = enemies.map(e => `<option value="${e.id}">${esc(e.name)} [HP: ${e.hp} | Bonus: ${e.initiative_bonus >= 0 ? '+' : ''}${e.initiative_bonus}]</option>`).join('');
-    if (enemies.length === 0)
+    const enemyNameInput = document.getElementById('enemy-name-input');
+    enemySelect.innerHTML = enemies.map(e => `<option value="${e.id}" data-name="${esc(e.name)}">${esc(e.name)} [HP: ${e.hp} | Bonus: ${e.initiative_bonus >= 0 ? '+' : ''}${e.initiative_bonus}]</option>`).join('');
+    if (enemies.length === 0) {
         enemySelect.innerHTML = '<option disabled>Nenhum inimigo cadastrado</option>';
+    }
+    else {
+        const updateNamePlaceholder = () => {
+            const opt = enemySelect.selectedOptions[0];
+            if (opt && enemyNameInput)
+                enemyNameInput.placeholder = opt.dataset['name'] ?? '';
+        };
+        enemySelect.addEventListener('change', updateNamePlaceholder);
+        updateNamePlaceholder();
+    }
 }
 document.getElementById('add-participant-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -227,6 +240,9 @@ document.getElementById('add-participant-form')?.addEventListener('submit', asyn
     }
     else {
         body['enemy'] = Number(document.getElementById('enemy-select').value);
+        const nameOverride = document.getElementById('enemy-name-input').value.trim();
+        if (nameOverride)
+            body['name_override'] = nameOverride;
     }
     const res = await apiFetch(`/api/combats/${combatId}/participants/`, { method: 'POST', body: JSON.stringify(body) });
     if (res.ok) {
@@ -239,6 +255,7 @@ document.getElementById('add-participant-form')?.addEventListener('submit', asyn
 function closeModal() {
     const modal = document.getElementById('add-modal');
     modal.style.display = 'none';
+    document.getElementById('enemy-name-input').value = '';
 }
 // ─── Participant Actions ───────────────────────────────────────────────────────
 async function updateInitiative(id, value) {
@@ -248,12 +265,7 @@ async function updateInitiative(id, value) {
     });
     loadCombat();
 }
-async function updateHP(id, newHP, participantType) {
-    if (newHP <= 0 && participantType === 'enemy') {
-        await apiFetch(`/api/participants/${id}/`, { method: 'DELETE' });
-        loadCombat();
-        return;
-    }
+async function updateHP(id, newHP, _participantType) {
     const hp = Math.max(0, newHP);
     const body = { current_hp: hp };
     if (isMaster)

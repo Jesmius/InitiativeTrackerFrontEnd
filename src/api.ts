@@ -47,6 +47,7 @@ export interface CombatParticipant {
   order: number;
   is_alive: boolean;
   current_hp: number | null;
+  name_override: string;
 }
 
 export interface PartyMember {
