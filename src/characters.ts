@@ -18,7 +18,7 @@ async function loadCharacters(): Promise<void> {
   if (chars.length === 0) {
     list.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">🧙</div>
+        <div class="empty-icon"></div>
         <p>Nenhum personagem cadastrado. Crie o primeiro!</p>
       </div>`;
     return;

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogadores | Initiative Tracker</title>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+  <main class="container">
+    <div id="page-alert" class="alert alert-error"></div>
+
+    <div class="page-header flex-between mb-3">
+      <div>
+        <h1>Meus Jogadores</h1>
+        <p class="text-muted">Gerencie os jogadores das suas campanhas. Apenas personagens de jogadores da sua lista aparecem nos combates.</p>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header flex-between">
+        <h2>Adicionar Jogador</h2>
+      </div>
+      <div id="add-alert" class="alert alert-error"></div>
+      <form id="add-form" class="flex gap-1" style="align-items:flex-end">
+        <div class="form-group" style="flex:1;margin-bottom:0">
+          <label class="form-label" for="username-input">Username do jogador</label>
+          <input class="form-control" id="username-input" type="text" placeholder="Digite o username..." required>
+        </div>
+        <button class="btn btn-primary" id="add-btn" type="submit">Adicionar</button>
+      </form>
+    </div>
+
+    <div id="member-list">
+      <p class="text-muted text-center mt-2">Carregando...</p>
+    </div>
+  </main>
+
+  <script type="module" src="./dist/party.js"></script>
+</body>
+</html>

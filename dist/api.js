@@ -111,11 +111,12 @@ export function renderNav(activePage) {
     const nav = document.createElement('nav');
     nav.className = 'navbar';
     nav.innerHTML = `
-    <a class="nav-brand" href="./dashboard.html">⚔️ Initiative Tracker</a>
+    <a class="nav-brand" href="./dashboard.html">Initiative Tracker</a>
     <div class="nav-links">
       <a href="./dashboard.html"${linkClass('dashboard')}>Combates</a>
       ${isMaster
-        ? `<a href="./enemies.html"${linkClass('enemies')}>Inimigos</a>`
+        ? `<a href="./enemies.html"${linkClass('enemies')}>Inimigos</a>
+           <a href="./party.html"${linkClass('party')}>Jogadores</a>`
         : `<a href="./characters.html"${linkClass('characters')}>Personagens</a>`}
       <a href="./profile.html"${linkClass('profile')}>Perfil</a>
     </div>

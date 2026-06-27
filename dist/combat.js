@@ -36,18 +36,12 @@ function render() {
     const currentParticipant = sorted.find(p => p.id === c.current_participant_id) ?? null;
     const turnBanner = document.getElementById('turn-banner');
     if (currentParticipant) {
-        const isMyTurn = !isMaster && currentParticipant.participant_type === 'character'
-            && currentParticipant.character != null;
-        const myChars = c.participants.filter(p => p.participant_type === 'character' && p.character != null);
-        const myChar = myChars.find(p => {
-            return !isMaster && p.id === currentParticipant.id;
-        });
-        let turnText = `⚡ Turno de: <strong>${esc(currentParticipant.display_name)}</strong>`;
-        if (!isMaster && currentParticipant.participant_type === 'character') {
-            // check if this character belongs to the current user
-            // we need to check via character data
-            turnText += isMyTurn ? ' — <span class="text-accent">É a sua vez!</span>' : '';
-        }
+        const isMyTurn = !isMaster
+            && currentParticipant.participant_type === 'character'
+            && currentParticipant.character_player_id === myUserId;
+        let turnText = `Turno de: <strong>${esc(currentParticipant.display_name)}</strong>`;
+        if (isMyTurn)
+            turnText += ' — <span class="text-accent">E a sua vez!</span>';
         turnBanner.innerHTML = turnText;
         turnBanner.style.display = 'block';
     }
@@ -67,36 +61,54 @@ function renderTable(participants, currentId) {
     tbody.innerHTML = '';
     participants.forEach((p, idx) => {
         const isCurrent = p.id === currentId;
+        const isDead = !p.is_alive;
         const tr = document.createElement('tr');
-        tr.className = `participant-row${isCurrent ? ' current-turn' : ''}${!p.is_alive ? ' dead' : ''}`;
+        tr.className = `participant-row${isCurrent ? ' current-turn' : ''}${isDead ? ' dead' : ''}`;
         const typeBadge = p.participant_type === 'character'
             ? '<span class="badge badge-character">Personagem</span>'
             : '<span class="badge badge-enemy">Inimigo</span>';
+        const isMyCharacter = !isMaster
+            && p.participant_type === 'character'
+            && p.character_player_id === myUserId;
+        const canEditHP = isMaster || isMyCharacter;
+        const hpCell = canEditHP
+            ? `<input class="input-edit" type="number" value="${p.current_hp ?? ''}" placeholder="—" data-hp="${p.id}" data-ptype="${p.participant_type}" style="width:64px">`
+            : `<span>${p.current_hp !== null ? p.current_hp : '—'}</span>`;
+        const initCell = isMaster
+            ? `<input class="input-edit" type="number" value="${p.initiative_value}" data-pid="${p.id}" style="width:60px">`
+            : `${p.initiative_value}`;
+        const deadBadge = isDead && p.participant_type === 'character'
+            ? ' <span class="badge badge-inactive">Morto</span>'
+            : '';
         let actionsHTML = '';
         if (isMaster) {
             actionsHTML = `
-        <input class="input-edit" type="number" value="${p.initiative_value}" data-pid="${p.id}" title="Iniciativa" style="width:60px">
-        <button class="btn btn-sm btn-outline" data-toggle="${p.id}" title="${p.is_alive ? 'Marcar morto' : 'Reviver'}">
-          ${p.is_alive ? '☠️' : '💚'}
-        </button>
-        <button class="btn btn-sm btn-danger" data-remove="${p.id}" title="Remover">✕</button>
+        <button class="btn btn-sm btn-outline" data-toggle="${p.id}">${p.is_alive ? 'Matar' : 'Reviver'}</button>
+        <button class="btn btn-sm btn-danger" data-remove="${p.id}">Remover</button>
       `;
         }
         tr.innerHTML = `
-      <td class="turn-pos">${isCurrent ? '▶' : idx + 1}</td>
-      <td class="participant-name">${esc(p.display_name)}</td>
+      <td class="turn-pos">${isCurrent ? '→' : idx + 1}</td>
+      <td class="participant-name">${esc(p.display_name)}${deadBadge}</td>
       <td>${typeBadge}</td>
-      <td class="initiative-val">${p.initiative_value}</td>
-      <td>${p.is_alive ? '✅' : '☠️'}</td>
+      <td style="text-align:center">${initCell}</td>
+      <td style="text-align:center">${hpCell}</td>
       <td class="actions-col">${actionsHTML}</td>
     `;
         tbody.appendChild(tr);
     });
-    // Bind master action events
-    if (isMaster) {
-        tbody.querySelectorAll('.input-edit').forEach(input => {
-            input.addEventListener('change', () => updateInitiative(Number(input.dataset['pid']), Number(input.value)));
+    tbody.querySelectorAll('[data-pid]').forEach(input => {
+        input.addEventListener('change', () => updateInitiative(Number(input.dataset['pid']), Number(input.value)));
+    });
+    tbody.querySelectorAll('[data-hp]').forEach(input => {
+        input.addEventListener('change', () => {
+            const id = Number(input.dataset['hp']);
+            const ptype = input.dataset['ptype'];
+            const hp = Number(input.value);
+            updateHP(id, hp, ptype);
         });
+    });
+    if (isMaster) {
         tbody.querySelectorAll('[data-toggle]').forEach(btn => {
             btn.addEventListener('click', () => toggleAlive(Number(btn.dataset['toggle'])));
         });
@@ -124,9 +136,10 @@ function renderPlayerControls(participants, currentId) {
     section.style.display = 'block';
     const passBtn = document.getElementById('pass-turn-btn');
     const current = participants.find(p => p.id === currentId);
-    const isMyTurn = current?.participant_type === 'character' && current?.character != null;
+    const isMyTurn = current?.participant_type === 'character'
+        && current?.character_player_id === myUserId;
     passBtn.disabled = !isMyTurn;
-    passBtn.title = isMyTurn ? 'Passar seu turno' : 'Não é sua vez';
+    passBtn.title = isMyTurn ? 'Passar seu turno' : 'Nao e sua vez';
 }
 // ─── Actions ──────────────────────────────────────────────────────────────────
 document.getElementById('next-turn-btn')?.addEventListener('click', async () => {
@@ -136,7 +149,7 @@ document.getElementById('next-turn-btn')?.addEventListener('click', async () => 
         render();
     }
     else
-        showAlert('page-alert', 'Erro ao avançar turno.', 'error');
+        showAlert('page-alert', 'Erro ao avancar turno.', 'error');
 });
 document.getElementById('sort-btn')?.addEventListener('click', async () => {
     const res = await apiFetch(`/api/combats/${combatId}/sort-initiative/`, { method: 'POST' });
@@ -154,7 +167,7 @@ document.getElementById('pass-turn-btn')?.addEventListener('click', async () => 
         render();
     }
     else
-        showAlert('page-alert', 'Não é sua vez.', 'error');
+        showAlert('page-alert', 'Nao e sua vez.', 'error');
 });
 document.getElementById('end-combat-btn')?.addEventListener('click', async () => {
     if (!currentCombat)
@@ -196,11 +209,11 @@ async function populateSelects() {
     const chars = charsRes.ok ? await charsRes.json() : [];
     const enemies = enemiesRes.ok ? await enemiesRes.json() : [];
     const charSelect = document.getElementById('char-select');
-    charSelect.innerHTML = chars.map(c => `<option value="${c.id}">${esc(c.name)} (${esc(c.player_username)}) [Bônus: ${c.initiative_bonus >= 0 ? '+' : ''}${c.initiative_bonus}]</option>`).join('');
+    charSelect.innerHTML = chars.map(c => `<option value="${c.id}">${esc(c.name)} (${esc(c.player_username)}) [Bonus: ${c.initiative_bonus >= 0 ? '+' : ''}${c.initiative_bonus}]</option>`).join('');
     if (chars.length === 0)
-        charSelect.innerHTML = '<option disabled>Nenhum personagem disponível</option>';
+        charSelect.innerHTML = '<option disabled>Nenhum jogador na sua lista. Adicione jogadores em "Jogadores".</option>';
     const enemySelect = document.getElementById('enemy-select');
-    enemySelect.innerHTML = enemies.map(e => `<option value="${e.id}">${esc(e.name)} [Bônus: ${e.initiative_bonus >= 0 ? '+' : ''}${e.initiative_bonus}]</option>`).join('');
+    enemySelect.innerHTML = enemies.map(e => `<option value="${e.id}">${esc(e.name)} [HP: ${e.hp} | Bonus: ${e.initiative_bonus >= 0 ? '+' : ''}${e.initiative_bonus}]</option>`).join('');
     if (enemies.length === 0)
         enemySelect.innerHTML = '<option disabled>Nenhum inimigo cadastrado</option>';
 }
@@ -229,7 +242,26 @@ function closeModal() {
 }
 // ─── Participant Actions ───────────────────────────────────────────────────────
 async function updateInitiative(id, value) {
-    await apiFetch(`/api/participants/${id}/`, { method: 'PATCH', body: JSON.stringify({ initiative_value: value }) });
+    await apiFetch(`/api/participants/${id}/`, {
+        method: 'PATCH',
+        body: JSON.stringify({ initiative_value: value }),
+    });
+    loadCombat();
+}
+async function updateHP(id, newHP, participantType) {
+    if (newHP <= 0 && participantType === 'enemy') {
+        await apiFetch(`/api/participants/${id}/`, { method: 'DELETE' });
+        loadCombat();
+        return;
+    }
+    const hp = Math.max(0, newHP);
+    const body = { current_hp: hp };
+    if (isMaster)
+        body['is_alive'] = hp > 0;
+    await apiFetch(`/api/participants/${id}/`, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+    });
     loadCombat();
 }
 async function toggleAlive(id) {

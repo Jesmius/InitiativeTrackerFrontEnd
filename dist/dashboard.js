@@ -20,7 +20,7 @@ async function loadCombats() {
     if (combats.length === 0) {
         combatList.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">⚔️</div>
+        <div class="empty-icon"></div>
         <p>${isMaster ? 'Nenhum combate criado ainda. Crie o primeiro abaixo!' : 'Você não está em nenhum combate no momento.'}</p>
       </div>`;
         return;

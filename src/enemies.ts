@@ -18,7 +18,7 @@ async function loadEnemies(): Promise<void> {
   if (enemies.length === 0) {
     list.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">👹</div>
+        <div class="empty-icon"></div>
         <p>Nenhum inimigo cadastrado. Crie o primeiro!</p>
       </div>`;
     return;

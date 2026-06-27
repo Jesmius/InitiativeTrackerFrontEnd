@@ -38,6 +38,7 @@ export interface CombatParticipant {
   combat: number;
   character: number | null;
   character_name: string | null;
+  character_player_id: number | null;
   enemy: number | null;
   enemy_name: string | null;
   display_name: string;
@@ -46,6 +47,12 @@ export interface CombatParticipant {
   order: number;
   is_alive: boolean;
   current_hp: number | null;
+}
+
+export interface PartyMember {
+  id: number;
+  player_id: number;
+  player_username: string;
 }
 
 export interface Combat {
@@ -187,11 +194,12 @@ export function renderNav(activePage?: string): void {
   const nav = document.createElement('nav');
   nav.className = 'navbar';
   nav.innerHTML = `
-    <a class="nav-brand" href="./dashboard.html">⚔️ Initiative Tracker</a>
+    <a class="nav-brand" href="./dashboard.html">Initiative Tracker</a>
     <div class="nav-links">
       <a href="./dashboard.html"${linkClass('dashboard')}>Combates</a>
       ${isMaster
-        ? `<a href="./enemies.html"${linkClass('enemies')}>Inimigos</a>`
+        ? `<a href="./enemies.html"${linkClass('enemies')}>Inimigos</a>
+           <a href="./party.html"${linkClass('party')}>Jogadores</a>`
         : `<a href="./characters.html"${linkClass('characters')}>Personagens</a>`}
       <a href="./profile.html"${linkClass('profile')}>Perfil</a>
     </div>
